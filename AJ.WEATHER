@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>AJ WEATHER</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial;
+      background: #0a1a2a;
+      color: white;
+      overflow: hidden;
+    }
+
+    #cutscene {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      background: black;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+
+    #aj, #weather {
+      position: absolute;
+      font-size: 70px;
+      font-weight: bold;
+    }
+
+    #aj { color: cyan; left: 30%; }
+    #weather { color: orange; left: 120%; }
+
+    @keyframes slam {
+      0% { left: 120%; }
+      60% { left: 30%; }
+      70% { left: 33%; }
+      100% { left: 30%; }
+    }
+
+    @keyframes ajFly {
+      to { left: -200%; opacity: 0; }
+    }
+
+    #main {
+      display: none;
+      padding: 20px;
+      text-align: center;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+    }
+
+    .panel {
+      background: #123;
+      padding: 20px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .panel:hover {
+      background: #1e3a5f;
+      transform: scale(1.05);
+    }
+
+    #overlay {
+      display: none;
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      background: black;
+      top: 0;
+      left: 0;
+      z-index: 9998;
+    }
+
+    #overlayTop {
+      display: flex;
+      justify-content: space-between;
+      background: #111;
+      padding: 10px;
+    }
+
+    iframe {
+      width: 100%;
+      height: 90%;
+      border: none;
+    }
+
+    #staffBtn {
+      position: fixed;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: red;
+      padding: 10px 20px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    #staffPanel {
+      display: none;
+      position: fixed;
+      bottom: 60px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #111;
+      padding: 20px;
+      border-radius: 10px;
+      width: 300px;
+    }
+
+    input {
+      width: 100%;
+      padding: 8px;
+    }
+
+    #suggestions {
+      font-size: 12px;
+      color: lightgray;
+      text-align: left;
+    }
+
+    #banner {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      background: yellow;
+      color: black;
+      text-align: center;
+      padding: 10px;
+      display: none;
+    }
+
+    .popup {
+      position: fixed;
+      right: 10px;
+      bottom: 80px;
+      background: #222;
+      padding: 15px;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div id="cutscene">
+  <div id="aj">AJ</div>
+  <div id="weather">WEATHER</div>
+</div>
+
+<div id="main">
+  <h1>🌪️ AJ WEATHER</h1>
+
+  <div class="grid">
+    <div class="panel" onclick="openPanel('Radar')">Radar</div>
+    <div class="panel" onclick="openPanel('Velocity')">Velocity</div>
+    <div class="panel" onclick="openPanel('Rainfall')">Rainfall</div>
+    <div class="panel" onclick="openPanel('Satellite')">Satellite</div>
+    <div class="panel" onclick="openPanel('Wind')">Wind</div>
+    <div class="panel" onclick="openPanel('Temperature')">Temperature</div>
+    <div class="panel" onclick="openPanel('Lightning')">Lightning</div>
+    <div class="panel" onclick="openPanel('Future')">Future Radar</div>
+  </div>
+</div>
+
+<div id="overlay">
+  <div id="overlayTop">
+    <span id="title"></span>
+    <button onclick="closePanel()">X</button>
+  </div>
+  <div id="overlayContent"></div>
+</div>
+
+<div id="staffBtn">STAFF PANEL</div>
+
+<div id="staffPanel">
+  <input id="cmd" placeholder="Command..." oninput="suggest()">
+  <div id="suggestions"></div>
+  <button onclick="runCommand()">Run</button>
+</div>
+
+<div id="banner"></div>
+<audio id="sound" src="https://www.soundjay.com/button/beep-07.wav"></audio>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+  const cutscene = document.getElementById("cutscene");
+  const aj = document.getElementById("aj");
+  const weather = document.getElementById("weather");
+  const main = document.getElementById("main");
+  const overlay = document.getElementById("overlay");
+  const title = document.getElementById("title");
+  const overlayContent = document.getElementById("overlayContent");
+  const staffBtn = document.getElementById("staffBtn");
+  const staffPanel = document.getElementById("staffPanel");
+  const cmd = document.getElementById("cmd");
+  const suggestions = document.getElementById("suggestions");
+  const banner = document.getElementById("banner");
+  const sound = document.getElementById("sound");
+
+  setTimeout(() => {
+    weather.style.animation = "slam 1.5s forwards";
+    setTimeout(() => aj.style.animation = "ajFly 1s forwards", 800);
+  }, 500);
+
+  setTimeout(() => {
+    cutscene.style.display = "none";
+    main.style.display = "block";
+  }, 3000);
+
+  window.openPanel = function(type) {
+    overlay.style.display = "block";
+    title.innerText = type;
+
+    if(type==="Radar"){
+      overlayContent.innerHTML = `<iframe src="https://www.rainviewer.com/map.html?loc=42.27,-89.09,6&layer=radar"></iframe>`;
+    } else {
+      overlayContent.innerHTML = `<iframe src="https://embed.windy.com/embed2.html?lat=42.27&lon=-89.09&zoom=6"></iframe>`;
+    }
+  };
+
+  window.closePanel = function() {
+    overlay.style.display = "none";
+  };
+
+  staffBtn.onclick = () => {
+    let p = prompt("Password:");
+    if(p === "sadieandfinn") staffPanel.style.display = "block";
+  };
+
+  const cmds = ["announce","clear","alert tornado","alert storm","darkmode","lightmode"];
+
+  window.suggest = function() {
+    suggestions.innerHTML = cmds.filter(c => c.startsWith(cmd.value.toLowerCase())).join("<br>");
+  };
+
+  function notify(msg){
+    banner.innerText = msg;
+    banner.style.display = "block";
+
+    let pop = document.createElement("div");
+    pop.className = "popup";
+    pop.innerText = msg;
+    document.body.appendChild(pop);
+
+    sound.play();
+    setTimeout(() => pop.remove(), 4000);
+  }
+
+  window.runCommand = function() {
+    let c = cmd.value.toLowerCase();
+
+    if(c.startsWith("announce ")) notify(c.replace("announce ",""));
+    else if(c==="clear") banner.style.display="none";
+    else if(c==="alert tornado") notify("🌪️ Tornado Warning");
+    else if(c==="alert storm") notify("⛈️ Storm Warning");
+    else if(c==="darkmode") document.body.style.background="black";
+    else if(c==="lightmode") document.body.style.background="#ccc";
+    else notify("Unknown command");
+  };
+
+});
+</script>
+
+</body>
+</html>
